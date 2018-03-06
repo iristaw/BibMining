@@ -1,0 +1,88 @@
+#
+require(ggplot2)
+require(data.table)
+require(stringr)
+#论文增长趋势 
+#按年计算
+wos.year <- function(items) {
+    #先选取UT,年份
+    return(items[, .(Count = uniqueN(UT)), by = PY])
+}
+wos.year.visual <- function(data) {
+    qplot(PY, Count, data = data)
+}
+#按月计算呢
+extractMonth <- function(str) {
+    term <- str_extract(str, "[A-Z]{3}")
+    if (is.vector(term)) {
+        return(sapply(term, function(exp) {
+            return(switch(exp,
+        JAN = 1,
+        FEB = 2,
+        MAR = 3,
+        APR = 4,
+        MAY = 5,
+        JUN = 6,
+        JUL = 7,
+        AUG = 8,
+        SEP = 9,
+        OCT = 10,
+        NOV = 11,
+        DEC = 12,
+        SPR = 4,
+        SUM = 7,
+        FAL = 10,
+        WIN = 1
+        ))
+        }));
+    } else {
+        return(switch(term,
+        JAN = 1,
+        FEB = 2,
+        MAR = 3,
+        APR = 4,
+        MAY = 5,
+        JUN = 6,
+        JUL = 7,
+        AUG = 8,
+        SEP = 9,
+        OCT = 10,
+        NOV = 11,
+        DEC = 12,
+        SPR = 4,
+        SUM = 7,
+        FAL = 10,
+        WIN = 1
+        ))
+    }
+
+}
+
+MatchMonth <- function(vl, items) {
+    #根据vl匹配到items中相同的Month,取最大值
+    items[VL == vl, .(Count = .N), by = Month][order(-Count)][1, Month]
+}
+
+ConvertMonth <- function(items) {
+    #先解决有时间的记录
+    items[!is.na(PD), Month := extractMonth(PD)]
+    #补充没有PD列的
+    setkey(items, VL)
+    items[is.na(PD) && !is.na(VL), Month := sapply(VL, MatchMonth, items)]
+
+    setkey(items, NULL)
+    return(items)
+}
+
+wos.year.month <- function(items, na.rm = TRUE) {
+    setkey(items, PY, Month, UT)
+    if (na.rm) {
+        return(items[!is.na(Month), .(Count = uniqueN(UT)), by = "PY,Month"])
+    } else {
+        return(items[, .(Count = uniqueN(UT)), by = "PY,Month"])
+    }
+}
+
+wos.author <- function(items) {
+
+}
