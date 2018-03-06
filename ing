@@ -1,0 +1,19 @@
+#文献类型
+wos.documenttype.year <- function(items) {
+    dtList <- str_split(items$DT, ";")
+
+    year <- foreach(y = items$PY,i=seq_along(dtList), .combine = "c") %do% {
+        rep(y, length(dtList[[i]]))
+    }
+
+    return(data.table(documenttype = unlist(dtList)))
+}
+
+wos.documenttype <- function(items) {
+    return(unlist(str_split(items$DT,";")))
+}
+
+#学科
+wos.category <- function(items) {
+    return(unlist(str_split(items$WC, ";")))
+}
