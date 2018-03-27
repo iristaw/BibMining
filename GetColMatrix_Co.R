@@ -1,4 +1,5 @@
 #由于合著行为，一条记录的地址字段会有多个作者，相应多个国家，故要将地址字段按“；”分割，但由于此字段也包含作者，作者信息中也有“；”，所以要先替换“[]”中的“；”为“#”
+#require package stringr
 wos.string.replace <- function(line, oldchar, newchar) {
   reg <- "\\[(\\s|\\S)*?\\]"
   pos <- str_locate_all(line,reg)
